@@ -8,11 +8,13 @@ const taskForm = document.getElementById("task-form");
 const taskInput = document.getElementById("task-input");
 const taskList = document.getElementById("task-list");
 const clearCompletedButton = document.getElementById("clear-completed");
+const taskCounter = document.getElementById("task-counter");
+
 // Struktur satu task: { id, text, completed }
 // NOTE: "completed" sudah disiapkan di data model, tapi belum
 // dipakai di mana pun. Itu tugas kamu di Fitur #1.
-let tasks = [];
-let nextId = 1;
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+let nextId=tasks.length>0?Math.max(...tasks.map(t=>t.id))+1:1;
 
 // TODO (Fitur #4 - Simpan ke localStorage):
 // Saat aplikasi pertama kali dibuka, load "tasks" dari localStorage
@@ -28,6 +30,10 @@ function renderTasks() {
     emptyState.className = "empty-state";
     emptyState.textContent = "Belum ada task. Tambahkan satu di atas!";
     taskList.appendChild(emptyState);
+
+    const remainingTasks = tasks.filter((task) => !task.completed).length;
+    taskCounter.textContent = `${remainingTasks} task tersisa`;
+
     return;
   }
 
@@ -64,6 +70,41 @@ function renderTasks() {
     // menjadi <input> berisi teks task supaya bisa diubah,
     // lalu simpan perubahannya saat user menekan Enter / klik Save.
 
+    const editBtn = document.createElement("button");
+    editBtn.className = "edit-btn";
+    editBtn.textContent = "Edit";
+
+    editBtn.addEventListener("click", () => {
+      const editInput = document.createElement("input");
+
+      editInput.type = "text";
+      editInput.className = "edit-input";
+      editInput.value = task.text;
+
+      const saveBtn = document.createElement("button");
+
+      saveBtn.className = "save-btn";
+      saveBtn.textContent = "Save";
+
+      const saveEdit = () => {
+        editTask(task.id, editInput.value);
+      };
+
+      saveBtn.addEventListener("click", saveEdit);
+
+      editInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          saveEdit();
+        }
+      });
+
+      li.replaceChild(editInput, span);
+      li.replaceChild(saveBtn, editBtn);
+
+      editInput.focus();
+      editInput.select();
+    });
+
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-btn";
     deleteBtn.textContent = "✕";
@@ -71,18 +112,21 @@ function renderTasks() {
 
     li.appendChild(checkbox);
     li.appendChild(span);
+    li.appendChild(editBtn);
     li.appendChild(deleteBtn);
     taskList.appendChild(li);
   });
 
   // TODO (Fitur #5 - Counter):
-  // Update elemen #task-counter di sini setiap kali renderTasks() dipanggil,
-  // isinya jumlah task yang belum selesai. Contoh: "3 task tersisa".
+  const remainingTasks = tasks.filter((task) => !task.completed).length;
+  taskCounter.textContent = `${remainingTasks} task tersisa`;
 
   // TODO (Fitur #4 - Simpan ke localStorage):
   // Setiap kali renderTasks() dipanggil, data "tasks" sudah berubah,
   // jadi ini tempat yang pas untuk menyimpan ulang ke localStorage.
   // Hint: localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
 function clearCompleted() {
@@ -130,6 +174,27 @@ function toggleComplete(id) {
 // TODO (Fitur #2 - Edit Task):
 // Buat function editTask(id, newText) yang mengubah task.text
 // untuk task dengan id yang cocok, lalu panggil renderTasks().
+
+function editTask(id, newText) {
+  const trimmed = newText.trim();
+
+  if (trimmed === "") {
+    return;
+  }
+
+  tasks = tasks.map((task) => {
+    if (task.id === id) {
+      return {
+        ...task,
+        text: trimmed,
+      };
+    }
+
+    return task;
+  });
+
+  renderTasks();
+}
 
 // TODO (Fitur #6 - Clear Completed):
 // Buat function clearCompleted() yang menghapus semua task dengan
