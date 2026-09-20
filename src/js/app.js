@@ -7,6 +7,7 @@
 const taskForm = document.getElementById("task-form");
 const taskInput = document.getElementById("task-input");
 const taskList = document.getElementById("task-list");
+const clearCompletedButton = document.getElementById("clear-completed");
 const taskCounter = document.getElementById("task-counter");
 
 // Struktur satu task: { id, text, completed }
@@ -128,6 +129,11 @@ function renderTasks() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
+function clearCompleted() {
+  tasks = tasks.filter((task) => !task.completed);
+  renderTasks();
+}
+
 function addTask(text) {
   const trimmed = text.trim();
   if (trimmed === "") return;
@@ -207,5 +213,7 @@ taskForm.addEventListener("submit", (event) => {
   taskInput.value = "";
   taskInput.focus();
 });
+
+clearCompletedButton.addEventListener("click", clearCompleted);
 
 renderTasks();
