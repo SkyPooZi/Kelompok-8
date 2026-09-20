@@ -11,8 +11,8 @@ const taskList = document.getElementById("task-list");
 // Struktur satu task: { id, text, completed }
 // NOTE: "completed" sudah disiapkan di data model, tapi belum
 // dipakai di mana pun. Itu tugas kamu di Fitur #1.
-let tasks = [];
-let nextId = 1;
+let tasks=JSON.parse(localStorage.getItem("tasks"))||[];
+let nextId=tasks.length>0?Math.max(...tasks.map(t=>t.id))+1:1;
 
 // TODO (Fitur #4 - Simpan ke localStorage):
 // Saat aplikasi pertama kali dibuka, load "tasks" dari localStorage
@@ -119,6 +119,8 @@ function renderTasks() {
   // Setiap kali renderTasks() dipanggil, data "tasks" sudah berubah,
   // jadi ini tempat yang pas untuk menyimpan ulang ke localStorage.
   // Hint: localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
 function addTask(text) {
