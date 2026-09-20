@@ -52,12 +52,48 @@ function renderTasks() {
     // menjadi <input> berisi teks task supaya bisa diubah,
     // lalu simpan perubahannya saat user menekan Enter / klik Save.
 
+    const editBtn = document.createElement("button");
+    editBtn.className = "edit-btn";
+    editBtn.textContent = "Edit";
+
+    editBtn.addEventListener("click", () => {
+      const editInput = document.createElement("input");
+
+      editInput.type = "text";
+      editInput.className = "edit-input";
+      editInput.value = task.text;
+
+      const saveBtn = document.createElement("button");
+
+      saveBtn.className = "save-btn";
+      saveBtn.textContent = "Save";
+
+      const saveEdit = () => {
+        editTask(task.id, editInput.value);
+      };
+
+      saveBtn.addEventListener("click", saveEdit);
+
+      editInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          saveEdit();
+        }
+      });
+
+      li.replaceChild(editInput, span);
+      li.replaceChild(saveBtn, editBtn);
+
+      editInput.focus();
+      editInput.select();
+    });
+
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-btn";
     deleteBtn.textContent = "✕";
     deleteBtn.addEventListener("click", () => deleteTask(task.id));
 
     li.appendChild(span);
+    li.appendChild(editBtn);
     li.appendChild(deleteBtn);
     taskList.appendChild(li);
   });
@@ -97,6 +133,27 @@ function deleteTask(id) {
 // TODO (Fitur #2 - Edit Task):
 // Buat function editTask(id, newText) yang mengubah task.text
 // untuk task dengan id yang cocok, lalu panggil renderTasks().
+
+function editTask(id, newText) {
+  const trimmed = newText.trim();
+
+  if (trimmed === "") {
+    return;
+  }
+
+  tasks = tasks.map((task) => {
+    if (task.id === id) {
+      return {
+        ...task,
+        text: trimmed,
+      };
+    }
+
+    return task;
+  });
+
+  renderTasks();
+}
 
 // TODO (Fitur #6 - Clear Completed):
 // Buat function clearCompleted() yang menghapus semua task dengan
