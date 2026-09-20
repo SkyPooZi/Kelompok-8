@@ -14,6 +14,8 @@ const taskList = document.getElementById("task-list");
 let tasks = [];
 let nextId = 1;
 
+let currentFilter = "all";
+
 // TODO (Fitur #4 - Simpan ke localStorage):
 // Saat aplikasi pertama kali dibuka, load "tasks" dari localStorage
 // (kalau ada) sebelum renderTasks() dipanggil pertama kali di bawah.
@@ -31,10 +33,14 @@ function renderTasks() {
     return;
   }
 
-  // TODO (Fitur #3 - Filter Task):
-  // Sebelum di-loop, filter dulu "tasks" sesuai filter aktif
-  // (semua / aktif / selesai). Sekarang semua task selalu ditampilkan.
-  tasks.forEach((task) => {
+  let filteredTasks = tasks;
+  if (currentFilter === "active") {
+    filteredTasks = tasks.filter((task) => !task.completed);
+  } else if (currentFilter === "completed") {
+    filteredTasks = tasks.filter((task) => task.completed);
+  }
+
+  filteredTasks.forEach((task) => {
     const li = document.createElement("li");
     li.className = "task-item";
     li.dataset.id = task.id;
@@ -103,11 +109,21 @@ function deleteTask(id) {
 // completed === true dari array "tasks", lalu panggil renderTasks().
 // Jangan lupa tambahkan event listener untuk tombol #clear-completed.
 
-// TODO (Fitur #3 - Filter Task):
-// Simpan filter yang sedang aktif di sebuah variabel, misalnya
-// `let currentFilter = "all";`, lalu tambahkan event listener untuk
-// setiap .filter-btn yang mengubah currentFilter dan memanggil
-// renderTasks() ulang.
+// PERBAIKAN: Fungsi setFilter yang utuh dan tidak terpotong
+function setFilter(filterType) {
+    currentFilter = filterType;
+    
+    // Hapus class 'active' dari semua tombol filter
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Tambahkan class 'active' pada tombol yang sedang diklik
+    document.getElementById(`filter-${filterType}`).classList.add('active');
+    
+    // Render ulang daftar task sesuai filter yang baru
+    renderTasks();
+}
 
 taskForm.addEventListener("submit", (event) => {
   event.preventDefault();
